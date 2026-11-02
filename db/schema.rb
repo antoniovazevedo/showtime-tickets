@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_02_224911) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_02_230257) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -26,4 +26,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_02_224911) do
     t.check_constraint "capacity > 0", name: "events_capacity_positive"
     t.check_constraint "starts_at < ends_at", name: "events_ends_after_start"
   end
+
+  create_table "tickets", force: :cascade do |t|
+    t.bigint "event_id", null: false
+    t.string "token", null: false
+    t.string "holder_name", null: false
+    t.string "holder_email"
+    t.string "holder_phone_number"
+    t.datetime "checked_in_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id"], name: "index_tickets_on_event_id"
+    t.index ["token"], name: "index_tickets_on_token", unique: true
+  end
+
+  add_foreign_key "tickets", "events"
 end

@@ -1,10 +1,10 @@
 FactoryBot.define do
   factory :event do
-    name { "MyString" }
-    description { "MyText" }
-    start { "2026-11-02 22:49:11" }
-    ends_at { "2026-11-02 22:49:11" }
-    location { "MyString" }
-    capacity { 1 }
+    name { "Amazing Show" }
+    description { "This show is really, really amazing." }
+    starts_at { 1.week.from_now }
+    ends_at { instance.starts_at + 1.hour }
+    location { "Amazing Venue" }
+    capacity { 100 }
   end
 end

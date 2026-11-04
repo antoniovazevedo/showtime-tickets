@@ -1,9 +1,14 @@
 FactoryBot.define do
   factory :ticket do
-    event { nil }
-    holder_name { "MyString" }
-    holder_email { "MyString" }
-    holder_phone_number { "MyString" }
-    checked_in_at { "2026-11-02 23:02:57" }
+    association :event
+    holder_name { "John Doe" }
+    holder_phone_number { "912345678" }
+    checked_in_at { nil }
+
+    sequence(:holder_email) { |n| "guest#{n}@example.com" }
+
+    trait :checked_in do
+      checked_in_at { Time.current }
+    end
   end
 end

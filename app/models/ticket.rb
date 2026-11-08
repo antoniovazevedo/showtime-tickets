@@ -23,6 +23,6 @@ class Ticket < ApplicationRecord
 
   def no_tickets_once_event_starts
     return unless event
-    errors.add(:base, "Event has already started") if event.starts_at < Time.current
+    errors.add(:base, "Event has already started") if event.starts_at <= Time.current
   end
 end

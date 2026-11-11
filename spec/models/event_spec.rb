@@ -44,10 +44,45 @@ RSpec.describe Event, type: :model do
     expect(event.errors.of_kind? :ends_at, :greater_than).to be true
   end
 
+  it "checks ends_at only if starts_at is present" do
+    event = build(:event, starts_at: nil, ends_at: 1.day.from_now)
+    expect(event).not_to be_valid
+    expect(event.errors[:ends_at]).to be_empty
+    expect(event.errors.of_kind? :starts_at, :blank).to be true
+  end
+
   it "requires capacity to be a number" do
     event = build(:event, capacity: "a")
     expect(event).not_to be_valid
     expect(event.errors.of_kind? :capacity, :not_a_number).to be true
+  end
+
+  it "requires capacity to not be below issued tickets" do
+    event = create(:event, capacity: 3)
+    create(:ticket, event:)
+    create(:ticket, event:)
+
+    event.capacity = 2
+    expect(event).to be_valid
+
+    event.capacity = 1
+    expect(event).not_to be_valid
+    expect(event.errors.of_kind? :capacity, "cannot be below issued tickets").to be true
+  end
+
+  it "validates capacity only when changed" do
+    event = create(:event)
+    create(:ticket, event:)
+    create(:ticket, event:)
+    event.update_column(:capacity, 1)
+    expect(event.update(name: "new name")).to be true
+  end
+
+  it "allows raising of capacity" do
+    event = create(:event, capacity: 1)
+    create(:ticket, event:)
+
+    expect(event.update(capacity: 2)).to be true
   end
 
   it "requires capacity to be an integer greater than zero" do

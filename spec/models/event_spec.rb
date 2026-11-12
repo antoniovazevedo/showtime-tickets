@@ -8,17 +8,17 @@ RSpec.describe Event, type: :model do
   it "requires name, starts_at, ends_at, location, capacity" do
     event = build(:event, name: nil, starts_at: nil, ends_at: nil, location: nil, capacity: nil)
     expect(event).not_to be_valid
-    expect(event.errors.of_kind? :name, :blank).to be true
-    expect(event.errors.of_kind? :starts_at, :blank).to be true
-    expect(event.errors.of_kind? :ends_at, :blank).to be true
-    expect(event.errors.of_kind? :location, :blank).to be true
-    expect(event.errors.of_kind? :capacity, :not_a_number).to be true
+    expect(event.errors).to be_of_kind(:name, :blank)
+    expect(event.errors).to be_of_kind(:starts_at, :blank)
+    expect(event.errors).to be_of_kind(:ends_at, :blank)
+    expect(event.errors).to be_of_kind(:location, :blank)
+    expect(event.errors).to be_of_kind(:capacity, :not_a_number)
   end
 
   it "requires name to be at most 200 characters long" do
     event = build(:event, name: "a" * 201)
     expect(event).not_to be_valid
-    expect(event.errors.of_kind? :name, :too_long).to be true
+    expect(event.errors).to be_of_kind(:name, :too_long)
 
     event = build(:event, name: "a" * 200)
     expect(event).to be_valid
@@ -27,7 +27,7 @@ RSpec.describe Event, type: :model do
   it "requires location to be at most 200 characters long" do
     event = build(:event, location: "a" * 201)
     expect(event).not_to be_valid
-    expect(event.errors.of_kind? :location, :too_long).to be true
+    expect(event.errors).to be_of_kind(:location, :too_long)
 
     event = build(:event, location: "a" * 200)
     expect(event).to be_valid
@@ -36,25 +36,25 @@ RSpec.describe Event, type: :model do
   it "requires ends_at to be after starts_at" do
     event = build(:event, ends_at: 1.day.ago)
     expect(event).not_to be_valid
-    expect(event.errors.of_kind? :ends_at, :greater_than).to be true
+    expect(event.errors).to be_of_kind(:ends_at, :greater_than)
 
     time = 1.day.from_now
     event = build(:event, starts_at: time, ends_at: time)
     expect(event).not_to be_valid
-    expect(event.errors.of_kind? :ends_at, :greater_than).to be true
+    expect(event.errors).to be_of_kind(:ends_at, :greater_than)
   end
 
   it "checks ends_at only if starts_at is present" do
     event = build(:event, starts_at: nil, ends_at: 1.day.from_now)
     expect(event).not_to be_valid
     expect(event.errors[:ends_at]).to be_empty
-    expect(event.errors.of_kind? :starts_at, :blank).to be true
+    expect(event.errors).to be_of_kind(:starts_at, :blank)
   end
 
   it "requires capacity to be a number" do
     event = build(:event, capacity: "a")
     expect(event).not_to be_valid
-    expect(event.errors.of_kind? :capacity, :not_a_number).to be true
+    expect(event.errors).to be_of_kind(:capacity, :not_a_number)
   end
 
   it "requires capacity to not be below issued tickets" do
@@ -67,7 +67,7 @@ RSpec.describe Event, type: :model do
 
     event.capacity = 1
     expect(event).not_to be_valid
-    expect(event.errors.of_kind? :capacity, "cannot be below issued tickets").to be true
+    expect(event.errors).to be_of_kind(:capacity, "cannot be below issued tickets")
   end
 
   it "validates capacity only when changed" do
@@ -75,24 +75,24 @@ RSpec.describe Event, type: :model do
     create(:ticket, event:)
     create(:ticket, event:)
     event.update_column(:capacity, 1)
-    expect(event.update(name: "new name")).to be true
+    expect(event.update(name: "new name"))
   end
 
   it "allows raising of capacity" do
     event = create(:event, capacity: 1)
     create(:ticket, event:)
 
-    expect(event.update(capacity: 2)).to be true
+    expect(event.update(capacity: 2))
   end
 
   it "requires capacity to be an integer greater than zero" do
     event = build(:event, capacity: 0)
     expect(event).not_to be_valid
-    expect(event.errors.of_kind? :capacity, :greater_than).to be true
+    expect(event.errors).to be_of_kind(:capacity, :greater_than)
 
     event = build(:event, capacity: 1.5)
     expect(event).not_to be_valid
-    expect(event.errors.of_kind? :capacity, :not_an_integer).to be true
+    expect(event.errors).to be_of_kind(:capacity, :not_an_integer)
 
     event = build(:event, capacity: 1)
     expect(event).to be_valid
@@ -107,7 +107,7 @@ RSpec.describe Event, type: :model do
       destroyed = event.destroy
     }.not_to change(Event, :count)
     expect(destroyed).to be false
-    expect(event.errors.of_kind? :base, :"restrict_dependent_destroy.has_many").to be true
+    expect(event.errors).to be_of_kind(:base, :"restrict_dependent_destroy.has_many")
   end
 
   it "can be deleted if it has no tickets" do

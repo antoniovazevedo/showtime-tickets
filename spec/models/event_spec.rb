@@ -97,4 +97,23 @@ RSpec.describe Event, type: :model do
     event = build(:event, capacity: 1)
     expect(event).to be_valid
   end
+
+  it "cannot be deleted if it has tickets" do
+    event = create(:event)
+    create(:ticket, event:)
+    destroyed = nil
+
+    expect {
+      destroyed = event.destroy
+    }.not_to change(Event, :count)
+    expect(destroyed).to be false
+    expect(event.errors.of_kind? :base, :"restrict_dependent_destroy.has_many").to be true
+  end
+
+  it "can be deleted if it has no tickets" do
+    event = create(:event)
+    expect {
+      event.destroy
+    }.to change(Event, :count).by(-1)
+  end
 end
